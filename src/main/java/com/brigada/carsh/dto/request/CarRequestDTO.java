@@ -22,5 +22,4 @@ public class CarRequestDTO {
     private BigDecimal minutePrice;
     private Location location;
     private CarStatus status;
-
 }

@@ -38,7 +38,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Car {
+public class Car { // todo cascade везде
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -59,7 +59,7 @@ public class Car {
     @Column(name = "minute_price", nullable = false)
     private BigDecimal minutePrice;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 

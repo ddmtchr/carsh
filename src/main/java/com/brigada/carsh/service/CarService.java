@@ -2,7 +2,9 @@ package com.brigada.carsh.service;
 
 import com.brigada.carsh.domain.car.Car;
 import com.brigada.carsh.domain.car.CarStatus;
+import com.brigada.carsh.dto.request.CarRequestDTO;
 import com.brigada.carsh.dto.response.CarResponseDTO;
+import com.brigada.carsh.exception.CarNotFoundException;
 import com.brigada.carsh.mapper.CarMapper;
 import com.brigada.carsh.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +30,15 @@ public class CarService {
 
     public List<CarResponseDTO> getAllAvailableCarsByRadius(BigDecimal latitude, BigDecimal longitude, int radius) {
         return carRepository.getAvailableCarsByRadius(latitude, longitude, radius);
+    }
+
+    public CarResponseDTO getCarById(Long id) {
+        return carRepository.findById(id).map(CarMapper.INSTANCE::toResponseDTO).orElseThrow(() ->
+                new CarNotFoundException(String.format("Car with id=%s was not found", id)));
+    }
+
+    public CarResponseDTO addCar(CarRequestDTO carRequestDTO) {
+        Car car = carRepository.save(CarMapper.INSTANCE.toEntity(carRequestDTO));
+        return CarMapper.INSTANCE.toResponseDTO(car);
     }
 }

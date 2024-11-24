@@ -1,15 +1,14 @@
 package com.brigada.carsh.controller;
 
+import com.brigada.carsh.dto.request.CarRequestDTO;
 import com.brigada.carsh.dto.response.CarResponseDTO;
 import com.brigada.carsh.service.CarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,10 +37,17 @@ public class CarController {
                     @Parameter(name = "radius", description = "Радиус в км", required = true, example = "2")
             }
     )
-    public ResponseEntity<List<CarResponseDTO>> getAllAvailableCarsByRadius(
-            @RequestParam(required = true) BigDecimal latitude,
-            @RequestParam(required = true) BigDecimal longitude,
-            @RequestParam(required = true) Integer radius) {
+    public ResponseEntity<List<CarResponseDTO>> getAllAvailableCarsByRadius(BigDecimal latitude, BigDecimal longitude, Integer radius) {
         return ResponseEntity.ok(carService.getAllAvailableCarsByRadius(latitude, longitude, radius));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CarResponseDTO> getCarById(@PathVariable Long id) {
+        return ResponseEntity.ok(carService.getCarById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<CarResponseDTO> addCar(@RequestBody CarRequestDTO carRequestDTO) {
+        return new ResponseEntity<>(carService.addCar(carRequestDTO), HttpStatus.CREATED);
     }
 }
