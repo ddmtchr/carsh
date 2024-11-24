@@ -52,7 +52,7 @@ public class User implements UserDetails {
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "rating", nullable = false, insertable = false)
     private BigDecimal rating;
 
     @Column(name = "payment_card", nullable = true)

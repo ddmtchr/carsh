@@ -25,6 +25,12 @@ public class AuthenticationService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.valueOf(request.getRole()))
+                .email(request.getEmail())
+                .name(request.getName())
+                .lastName(request.getLastName())
+                .phone(request.getPhone())
+                .experience(request.getExperience())
+                .birthDate(request.getBirthDate())
                 .build();
 
         User createdUser = userService.create(user);
