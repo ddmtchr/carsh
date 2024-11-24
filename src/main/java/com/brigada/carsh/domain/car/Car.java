@@ -1,6 +1,7 @@
 package com.brigada.carsh.domain.car;
 
 import com.brigada.carsh.domain.location.Location;
+import com.brigada.carsh.dto.response.CarResponseDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +12,28 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "car")
+@NamedNativeQuery(
+        name = "available_cars_by_radius",
+        query = "SELECT * FROM find_available_cars(:latitude, :longitude, :radius)",
+        resultSetMapping = "car_dto_mapping"
+)
+@SqlResultSetMapping(
+        name = "car_dto_mapping",
+        classes = @ConstructorResult(
+                targetClass = CarResponseDTO.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "registration_number", type = String.class),
+                        @ColumnResult(name = "model", type = String.class),
+                        @ColumnResult(name = "car_class", type = CarClass.class),
+                        @ColumnResult(name = "fuel_level", type = BigDecimal.class),
+                        @ColumnResult(name = "minute_price", type = BigDecimal.class),
+                        @ColumnResult(name = "latitude", type = BigDecimal.class),
+                        @ColumnResult(name = "longitude", type = BigDecimal.class),
+                        @ColumnResult(name = "status", type = CarStatus.class)
+                }
+        )
+)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

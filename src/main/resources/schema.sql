@@ -127,19 +127,19 @@ END;
 
 -- доступные машины по расстоянию
 CREATE OR REPLACE FUNCTION find_available_cars(
-    user_lat DECIMAL, user_lon DECIMAL, search_radius INT
+    user_lat DECIMAL, user_lon DECIMAL, search_radius_km INT
 ) RETURNS TABLE (
-    id BIGINT, registration_number VARCHAR, car_class VARCHAR, 
-	model VARCHAR, fuel_level DECIMAL, minute_price DECIMAL, 
-	latitude DECIMAL, longitude DECIMAL
+    id BIGINT, registration_number VARCHAR, model VARCHAR,
+    car_class VARCHAR, fuel_level DECIMAL, minute_price DECIMAL,
+	latitude DECIMAL, longitude DECIMAL, status VARCHAR
 ) AS '
 BEGIN
     RETURN QUERY
-    SELECT c.id, registration_number, car_class, model, fuel_level, minute_price, latitude, longitude
+    SELECT c.id, c.registration_number, c.model, c.car_class, c.fuel_level, c.minute_price, l.latitude, l.longitude, c.status
     FROM car c
     JOIN location l ON c.location_id = l.id
     WHERE c.status = ''AVAILABLE''
-    AND calculate_distance(user_lat, user_lon, latitude, longitude) <= search_radius;
+    AND calculate_distance(user_lat, user_lon, l.latitude, l.longitude) <= search_radius_km;
 END;
 ' LANGUAGE plpgsql;
 
