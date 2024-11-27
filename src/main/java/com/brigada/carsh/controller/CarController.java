@@ -50,4 +50,9 @@ public class CarController {
     public ResponseEntity<CarResponseDTO> addCar(@RequestBody CarRequestDTO carRequestDTO) {
         return new ResponseEntity<>(carService.addCar(carRequestDTO), HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CarResponseDTO> updateCar(@RequestBody CarRequestDTO carRequestDTO, @PathVariable Long id) {
+        return new ResponseEntity<>(carService.updateCar(carRequestDTO, id), HttpStatus.OK);
+    }
 }
