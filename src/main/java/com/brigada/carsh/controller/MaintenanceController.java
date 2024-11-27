@@ -18,7 +18,7 @@ public class MaintenanceController {
     private final MaintenanceService maintenanceService;
 
     @GetMapping("/car/{carId}")
-    @Operation(description = "Get maintenance by car")
+    @Operation(description = "Get all maintenance by car")
     public ResponseEntity<List<MaintenanceResponseDTO>> getAllMaintenanceByCarId(@PathVariable Long carId) {
         return ResponseEntity.ok(maintenanceService.getAllMaintenanceByCarId(carId));
     }
