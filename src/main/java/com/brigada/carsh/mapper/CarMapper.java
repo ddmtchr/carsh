@@ -5,6 +5,7 @@ import com.brigada.carsh.dto.request.CarRequestDTO;
 import com.brigada.carsh.dto.response.CarResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -17,4 +18,6 @@ public interface CarMapper {
     @Mapping(target = "latitude", source = "location.latitude")
     @Mapping(target = "longitude", source = "location.longitude")
     CarResponseDTO toResponseDTO(Car e);
+
+    void updateCar(CarRequestDTO requestDTO, @MappingTarget Car car);
 }

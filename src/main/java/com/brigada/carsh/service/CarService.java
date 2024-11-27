@@ -43,11 +43,8 @@ public class CarService {
     }
 
     public CarResponseDTO updateCar(CarRequestDTO carRequestDTO, Long id) {
-        if (!carRepository.existsById(id)) {
-            throw new CarNotFoundException(String.format("Car with id=%s was not found", id));
-        }
-        Car car = CarMapper.INSTANCE.toEntity(carRequestDTO);
-        car.setId(id);
+        Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException(String.format("Car with id=%s was not found", id)));
+        CarMapper.INSTANCE.updateCar(carRequestDTO, car);
         return CarMapper.INSTANCE.toResponseDTO(carRepository.save(car));
     }
 }
