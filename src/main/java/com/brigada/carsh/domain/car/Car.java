@@ -59,7 +59,7 @@ public class Car { // todo cascade везде
     @Column(name = "minute_price", nullable = false)
     private BigDecimal minutePrice;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 

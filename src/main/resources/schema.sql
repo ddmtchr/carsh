@@ -1,5 +1,20 @@
-DROP SCHEMA IF EXISTS public CASCADE; -- dev
-CREATE SCHEMA public;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS accident_report CASCADE;
+DROP TABLE IF EXISTS booking CASCADE;
+DROP TABLE IF EXISTS car CASCADE;
+DROP TABLE IF EXISTS document_verification CASCADE;
+DROP TABLE IF EXISTS feedback CASCADE;
+DROP TABLE IF EXISTS fine CASCADE;
+DROP TABLE IF EXISTS insurance CASCADE;
+DROP TABLE IF EXISTS location CASCADE;
+DROP TABLE IF EXISTS maintenance CASCADE;
+DROP TABLE IF EXISTS payment CASCADE;
+DROP TABLE IF EXISTS support_ticket CASCADE;
+
+DROP INDEX IF EXISTS idx_cars_status;
+DROP INDEX IF EXISTS idx_cars_class;
+DROP INDEX IF EXISTS idx_bookings_status;
+DROP INDEX IF EXISTS idx_support_tickets_status;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
@@ -34,10 +49,10 @@ CREATE TABLE IF NOT EXISTS car (
     registration_number VARCHAR(20) UNIQUE NOT NULL,
     model VARCHAR(50),
     car_class VARCHAR(50) CHECK (car_class IN ('SUPER_ECONOMY', 'ECONOMY', 'COMFORT', 'BUSINESS', 'ELITE')),
-    fuel_level DECIMAL(4, 1) CHECK (fuel_level >= 0 AND fuel_level <= 100),
+    fuel_level DECIMAL(5, 2) CHECK (fuel_level >= 0 AND fuel_level <= 100),
 	minute_price DECIMAL(5, 2) CHECK (minute_price > 0),
     location_id BIGINT REFERENCES location (id),
-    status VARCHAR(20) CHECK (status IN ('AVAILABLE', 'RENTED', 'MAINTENANCE'))
+    status VARCHAR(20) CHECK (status IN ('AVAILABLE', 'RENTED', 'MAINTENANCE', 'OUT_OF_SERVICE'))
 );
 
 CREATE TABLE IF NOT EXISTS booking (
@@ -46,10 +61,10 @@ CREATE TABLE IF NOT EXISTS booking (
     car_id BIGINT REFERENCES car(id) ON DELETE SET NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
-    status VARCHAR(20) CHECK (status IN ('ACTIVE', 'COMPLETED', 'CANCELLED')),
+    status VARCHAR(20) CHECK (status IN ('WAITING', 'ACTIVE', 'COMPLETED', 'CANCELLED')),
 	tariff VARCHAR(20) CHECK (tariff IN ('MINUTES', 'FIX', 'HOURS')),
     rental_cost DECIMAL(10, 2),
-    distance DECIMAL(10, 2),
+    distance DECIMAL(10, 3),
     start_location_id BIGINT REFERENCES location(id),
     end_location_id BIGINT REFERENCES location(id),
     insurance_id BIGINT REFERENCES insurance(id)
@@ -174,6 +189,15 @@ BEGIN
         RAISE EXCEPTION ''The car with id % is not available for booking.'', NEW.car_id;
     END IF;
 
+    IF EXISTS (SELECT 1
+               FROM (SELECT status
+                     FROM document_verification dv
+                     WHERE dv.user_id = NEW.user_id
+                     ORDER BY verification_date DESC LIMIT 1) sub
+               WHERE sub.status != ''VERIFIED'') THEN
+        RAISE EXCEPTION ''The user with id % has unverified passport or driving license.'', NEW.user_id;
+    END IF;
+
     -- Если доступна, продолжаем процесс создания бронирования
     RETURN NEW;
 END;
@@ -204,69 +228,140 @@ END;
 CREATE OR REPLACE TRIGGER trig_set_start_location_and_car_status
 AFTER INSERT ON booking
 FOR EACH ROW
-WHEN (NEW.status = 'ACTIVE')
+WHEN (NEW.status = 'WAITING')
 EXECUTE FUNCTION set_start_location_and_car_status();
 
+-- отмена аренды
+CREATE OR REPLACE FUNCTION cancel_booking()
+    RETURNS TRIGGER AS '
+    BEGIN
+        UPDATE booking
+        SET end_location_id = start_location_id
+        WHERE id = NEW.id;
+
+        UPDATE car
+        SET status = ''AVAILABLE''
+        WHERE id = NEW.car_id;
+
+        RETURN NEW;
+    END;
+' LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trig_cancel_booking
+    AFTER UPDATE OF status ON booking
+    FOR EACH ROW
+    WHEN (NEW.status = 'CANCELLED')
+EXECUTE FUNCTION cancel_booking();
+
 -- конец аренды, координаты окончания передаем в booking вместе со статусом COMPLETED
--- CREATE OR REPLACE FUNCTION set_end_location_and_car_status() -- todo допилить
--- RETURNS TRIGGER AS '
--- DECLARE
---     new_location_id BIGINT;
--- BEGIN
---     INSERT INTO location (latitude, longitude) VALUES (NEW.latitude, NEW.longitude)
---     RETURNING id INTO new_location_id;
---
---     UPDATE booking
---     SET end_location_id = new_location_id
---     WHERE id = NEW.id;
---
---     UPDATE car
---     SET location_id = new_location_id, status = ''AVAILABLE''
---     WHERE id = NEW.car_id;
---
---     RETURN NEW;
--- END;
--- ' LANGUAGE plpgsql;
-
--- CREATE OR REPLACE TRIGGER trig_set_end_location_and_car_status
--- AFTER UPDATE OF status ON booking
--- FOR EACH ROW
--- WHEN (NEW.status = 'COMPLETED')
--- EXECUTE FUNCTION set_end_location_and_car_status();
-
--- подсчет стоимости
-CREATE OR REPLACE FUNCTION calculate_rental_cost()
+CREATE OR REPLACE FUNCTION set_end_location_and_car_status_and_distance() -- todo допилить
 RETURNS TRIGGER AS '
 DECLARE
+    new_location_id BIGINT;
+    old_latitude NUMERIC;
+    old_longitude NUMERIC;
+    new_latitude NUMERIC;
+    new_longitude NUMERIC;
+    new_distance DOUBLE PRECISION;
     rental_duration INTERVAL;
+    new_rental_cost NUMERIC;
 BEGIN
-    rental_duration := NEW.end_time - NEW.start_time;
+    SELECT l.id, l.latitude, l.longitude INTO new_location_id, new_latitude, new_longitude
+    FROM location l JOIN car ON l.id = car.location_id WHERE car.id = NEW.car_id;
 
+    SELECT l.latitude, l.longitude INTO old_latitude, old_longitude
+    FROM location l WHERE l.id = NEW.start_location_id;
+
+    new_distance := calculate_distance(old_latitude, old_longitude, new_latitude, new_longitude);
+    rental_duration := NEW.end_time - NEW.start_time;
     IF NEW.tariff = ''MINUTES'' THEN
-        NEW.rental_cost := EXTRACT(EPOCH FROM rental_duration) / 60 * 
-            (SELECT minute_price FROM car WHERE id = NEW.car_id) *
-            (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+        new_rental_cost := EXTRACT(EPOCH FROM rental_duration) / 60 *
+                           (SELECT minute_price
+                            FROM car
+                            WHERE id = NEW.car_id) *
+                           (SELECT cost_ratio
+                            FROM insurance
+                            WHERE id = NEW.insurance_id);
 
     ELSIF NEW.tariff = ''HOURS'' THEN
-        NEW.rental_cost := ceil((EXTRACT(EPOCH FROM rental_duration) / 60) / 60.0) *
-            (SELECT minute_price FROM car WHERE id = NEW.car_id) * 60 * 0.95 *
-            (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+        new_rental_cost := ceil((EXTRACT(EPOCH FROM rental_duration) / 60) / 60.0) *
+                           (SELECT minute_price
+                            FROM car
+                            WHERE id = NEW.car_id) * 60 * 0.95 *
+                           (SELECT cost_ratio
+                            FROM insurance
+                            WHERE id = NEW.insurance_id);
 
     ELSIF NEW.tariff = ''FIX'' THEN
-        NEW.rental_cost := NEW.distance * 4 * (SELECT minute_price FROM car WHERE id = NEW.car_id) *
-            (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+        new_rental_cost := NEW.distance * 4 * (SELECT minute_price
+                                               FROM car
+                                               WHERE id = NEW.car_id) *
+                           (SELECT cost_ratio
+                            FROM insurance
+                            WHERE id = NEW.insurance_id);
 
     END IF;
+
+    UPDATE booking
+    SET end_location_id = new_location_id, distance = new_distance, rental_cost = new_rental_cost
+    WHERE id = NEW.id;
+
+    UPDATE car
+    SET status = ''AVAILABLE''
+    WHERE id = NEW.car_id;
 
     RETURN NEW;
 END;
 ' LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER trig_calculate_rental_cost
-BEFORE UPDATE OF status ON booking
+CREATE OR REPLACE TRIGGER trig1_set_end_location_and_car_status_and_distance
+AFTER UPDATE OF status ON booking
 FOR EACH ROW
 WHEN (NEW.status = 'COMPLETED')
-EXECUTE FUNCTION calculate_rental_cost();
+EXECUTE FUNCTION set_end_location_and_car_status_and_distance();
+
+-- -- подсчет стоимости
+-- CREATE OR REPLACE FUNCTION calculate_rental_cost()
+-- RETURNS TRIGGER AS '
+-- DECLARE
+--     rental_duration INTERVAL;
+-- BEGIN
+--     rental_duration := NEW.end_time - NEW.start_time;
+--
+--     IF NEW.tariff = ''MINUTES'' THEN
+--         NEW.rental_cost := EXTRACT(EPOCH FROM rental_duration) / 60 *
+--             (SELECT minute_price FROM car WHERE id = NEW.car_id) *
+--             (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+--
+--     ELSIF NEW.tariff = ''HOURS'' THEN
+--         NEW.rental_cost := ceil((EXTRACT(EPOCH FROM rental_duration) / 60) / 60.0) *
+--             (SELECT minute_price FROM car WHERE id = NEW.car_id) * 60 * 0.95 *
+--             (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+--
+--     ELSIF NEW.tariff = ''FIX'' THEN
+--         NEW.rental_cost := NEW.distance * 4 * (SELECT minute_price FROM car WHERE id = NEW.car_id) *
+--             (SELECT cost_ratio FROM insurance WHERE id = NEW.insurance_id);
+--
+--     END IF;
+--
+--     DELETE FROM location
+--     WHERE id NOT IN (
+--         SELECT start_location_id FROM booking
+--         UNION
+--         SELECT end_location_id FROM booking
+--         UNION
+--         SELECT location_id FROM car
+--     );
+--
+--     RETURN NEW;
+-- END;
+-- ' LANGUAGE plpgsql;
+--
+-- CREATE OR REPLACE TRIGGER trig3_calculate_rental_cost
+-- AFTER UPDATE OF status ON booking
+-- FOR EACH ROW
+-- WHEN (NEW.status = 'COMPLETED')
+-- EXECUTE FUNCTION calculate_rental_cost();
 
 
 CREATE INDEX IF NOT EXISTS idx_cars_status ON car(status);

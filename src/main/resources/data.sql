@@ -1,10 +1,10 @@
 -- Таблица users
 INSERT INTO users (username, role, email, password, name, last_name, phone, experience, birth_date, rating, payment_card) VALUES
-('john_doe', 'ROLE_USER', 'john.doe@example.com', 'hashedpassword1', 'John', 'Doe', '123456789012', 5, '1985-02-20', 4.7, '4111111111111111'),
-('jane_smith', 'ROLE_ADMIN', 'jane.smith@example.com', 'hashedpassword2', 'Jane', 'Smith', '234567890123', 3, '1990-06-15', 4.9, '4222222222222222'),
-('sam_brown', 'ROLE_ACCIDENT_COMMISSAR', 'sam.brown@example.com', 'hashedpassword3', 'Sam', 'Brown', '345678901234', 2, '1988-09-30', 5.0, '4333333333333333'),
-('lucas_white', 'ROLE_USER', 'lucas.white@example.com', 'hashedpassword4', 'Lucas', 'White', '456789012345', 7, '1982-01-10', 4.5, '4444444444444444'),
-('alice_green', 'ROLE_USER', 'alice.green@example.com', 'hashedpassword5', 'Alice', 'Green', '567890123456', 4, '1993-03-25', 4.8, '4555555555555555');
+('john_doe', 'ROLE_USER', 'john.doe@example.com', '$2a$10$m3Of7zuzdw7lrVCeCYCp7OlFQ5fL5reHAynTvPnRNkMksFBFRvT0y', 'John', 'Doe', '123456789012', 5, '1985-02-20', 4.7, '4111111111111111'),
+('jane_smith', 'ROLE_ADMIN', 'jane.smith@example.com', '$2a$10$VefyLRIkTLiS8QNc6kBIX.1q.LuoQ6RlmerhY22tyIKRNUjYaSnlm', 'Jane', 'Smith', '234567890123', 3, '1990-06-15', 4.9, '4222222222222222'),
+('sam_brown', 'ROLE_ACCIDENT_COMMISSAR', 'sam.brown@example.com', '$2a$10$04CKsa2KnKn8bA.fV/PUwuNMnyqOvFCFaRrW1Sxo4R5vYlrR7SmAu', 'Sam', 'Brown', '345678901234', 2, '1988-09-30', 5.0, '4333333333333333'),
+('lucas_white', 'ROLE_USER', 'lucas.white@example.com', '$2a$10$L0JvHTMH9F7W/yPeVeyYMeB5wSOCYAmt3pQZKia7voD8r7vZwtGf6', 'Lucas', 'White', '456789012345', 7, '1982-01-10', 4.5, '4444444444444444'),
+('alice_green', 'ROLE_USER', 'alice.green@example.com', '$2a$10$N.CnWoS5E75FSRXrbuUPGOgQ0cAHCCbkilwfrOtliD7sIWbroBiim', 'Alice', 'Green', '567890123456', 4, '1993-03-25', 4.8, '4555555555555555');
 
 -- Таблица location
 INSERT INTO location (latitude, longitude) VALUES
@@ -24,13 +24,13 @@ INSERT INTO insurance (insurance_type, coverage, cost_ratio) VALUES
 
 -- Таблица car
 INSERT INTO car (registration_number, model, car_class, fuel_level, minute_price, location_id, status) VALUES
-('E333EE763', 'Toyota Prius', 'COMFORT', 80.0, 0.20, 1, 'AVAILABLE'),
-('O787KP797', 'BMW X5', 'ELITE', 65.0, 0.50, 2, 'MAINTENANCE'),
-('T166XO799', 'Renault Kaptur', 'ECONOMY', 90.0, 0.30, 3, 'AVAILABLE'),
-('A547BT178', 'Mercedes C-Class', 'BUSINESS', 55.0, 0.40, 4, 'RENTED'),
-('X228YE198', 'Lada 2107', 'SUPER_ECONOMY', 75.0, 0.15, 5, 'AVAILABLE'),
-('B004KO23', 'Lada 2106', 'SUPER_ECONOMY', 15.0, 0.16, 6, 'AVAILABLE'),
-('T888TT09', 'Lada 2102', 'SUPER_ECONOMY', 34.3, 0.14, 7, 'AVAILABLE');
+('E333EE763', 'Toyota Prius', 'COMFORT', 80.0, 21.02, 1, 'AVAILABLE'),
+('O787KP797', 'BMW X5', 'ELITE', 65.0, 49.81, 2, 'MAINTENANCE'),
+('T166XO799', 'Renault Kaptur', 'ECONOMY', 90.0, 29.39, 3, 'AVAILABLE'),
+('A547BT178', 'Mercedes C-Class', 'BUSINESS', 55.0, 38.83, 4, 'RENTED'),
+('X228YE198', 'Lada 2107', 'SUPER_ECONOMY', 75.0, 15.1, 5, 'AVAILABLE'),
+('B004KO23', 'Lada 2106', 'SUPER_ECONOMY', 15.0, 16.2, 6, 'AVAILABLE'),
+('T888TT09', 'Lada 2102', 'SUPER_ECONOMY', 34.3, 14.35, 7, 'AVAILABLE');
 
 -- Таблица booking
 INSERT INTO booking (user_id, car_id, start_time, end_time, status, tariff, rental_cost, distance, start_location_id, end_location_id, insurance_id) VALUES

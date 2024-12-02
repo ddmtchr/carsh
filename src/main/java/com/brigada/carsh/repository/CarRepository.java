@@ -1,5 +1,6 @@
 package com.brigada.carsh.repository;
 
+import com.brigada.carsh.domain.booking.BookingStatus;
 import com.brigada.carsh.domain.car.Car;
 import com.brigada.carsh.domain.car.CarStatus;
 import com.brigada.carsh.dto.response.CarResponseDTO;
@@ -21,4 +22,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
             @Param("latitude") BigDecimal latitude,
             @Param("longitude") BigDecimal longitude,
             @Param("radius") int radius);
+
+    @Query("SELECT c FROM Car c WHERE c.id IN " +
+            "(SELECT b.car.id FROM Booking b WHERE b.status = :status)")
+    List<Car> getCarsByBookingStatus(@Param("status") BookingStatus status);
 }

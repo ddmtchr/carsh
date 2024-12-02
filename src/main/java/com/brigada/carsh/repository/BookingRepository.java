@@ -1,10 +1,15 @@
 package com.brigada.carsh.repository;
 
 import com.brigada.carsh.domain.booking.Booking;
+import com.brigada.carsh.domain.booking.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-
+    List<Booking> findAllByUser_Id(Long userId);
+    List<Booking> findAllByStatus(BookingStatus status);
+    List<Booking> findAllByStatusAndUser_Id(BookingStatus status, Long userId);
 }
