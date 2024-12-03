@@ -19,5 +19,6 @@ public interface CarMapper {
     @Mapping(target = "longitude", source = "location.longitude")
     CarResponseDTO toResponseDTO(Car e);
 
+    @Mapping(target = "id", ignore = true)
     void updateCar(CarRequestDTO requestDTO, @MappingTarget Car car);
 }

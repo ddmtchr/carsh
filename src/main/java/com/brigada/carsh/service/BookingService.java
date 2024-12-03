@@ -33,6 +33,11 @@ public class BookingService {
     private final UserRepository userRepository;
     private final InsuranceRepository insuranceRepository;
 
+    public BookingResponseDTO getBookingById(Long id) {
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new BookingNotFoundException(String.format("Booking with id=%s was not found", id)));
+        return BookingMapper.INSTANCE.toResponseDTO(booking);
+    }
+
     public List<BookingResponseDTO> getAllBookingsByUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException(String.format("User with id=%s was not found", userId));
@@ -111,8 +116,8 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.COMPLETED);
-        booking.setEndTime(LocalDateTime.now());       // todo distance в базе и вернуть сюда
-//        bookingRepository.save(booking);
-        return BookingMapper.INSTANCE.toResponseDTO(bookingRepository.save(booking));
+        booking.setEndTime(LocalDateTime.now());
+        bookingRepository.save(booking);
+        return BookingMapper.INSTANCE.toResponseDTO(bookingRepository.findById(booking.getId()).orElseThrow(() -> new BookingNotFoundException(String.format("Booking with id=%s was not found", bookingId))));
     }
 }

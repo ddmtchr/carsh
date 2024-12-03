@@ -26,6 +26,10 @@ public class Fine {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "support_ticket_id")
+    private SupportTicket supportTicket;
+
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
@@ -35,10 +39,6 @@ public class Fine {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private FineStatus status;
-
-    @OneToOne
-    @JoinColumn(name = "ticket_id")
-    private SupportTicket ticket;
 
     @Column(name = "reason", nullable = false)
     private String reason;

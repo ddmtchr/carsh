@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS support_ticket (
 CREATE TABLE IF NOT EXISTS fine (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id),
-    ticket_id BIGINT REFERENCES support_ticket(id),
+    support_ticket_id BIGINT REFERENCES support_ticket(id),
     amount DECIMAL(10, 2),
     issued_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) CHECK (status IN ('PENDING', 'PAID')),
@@ -158,28 +158,6 @@ BEGIN
 END;
 ' LANGUAGE plpgsql;
 
--- функция на запрос в техподдержку
-CREATE OR REPLACE FUNCTION create_support_ticket(
-    p_user_id BIGINT,
-    p_booking_id BIGINT,
-    p_issue_type VARCHAR(20),
-    p_description TEXT
-) RETURNS BIGINT AS '
-DECLARE
-    ticket_id BIGINT;
-BEGIN
-    INSERT INTO support_ticket (
-        user_id, booking_id, issue_type, description, status, created_at
-    )
-    VALUES (
-        p_user_id, p_booking_id, p_issue_type, p_description, ''OPEN'', CURRENT_TIMESTAMP
-    )
-    RETURNING id INTO ticket_id;
-
-    RETURN ticket_id;
-END;
-' LANGUAGE plpgsql;
-
 -- Проверка доступности автомобиля перед началом бронирования
 CREATE OR REPLACE FUNCTION check_car_availability()
 RETURNS TRIGGER AS '
@@ -192,8 +170,8 @@ BEGIN
     IF EXISTS (SELECT 1
                FROM (SELECT status
                      FROM document_verification dv
-                     WHERE dv.user_id = NEW.user_id
-                     ORDER BY verification_date DESC LIMIT 1) sub
+                     WHERE dv.user_id = NEW.user_id AND dv.verification_date IS NULL
+                        LIMIT 1) sub
                WHERE sub.status != ''VERIFIED'') THEN
         RAISE EXCEPTION ''The user with id % has unverified passport or driving license.'', NEW.user_id;
     END IF;
@@ -254,7 +232,7 @@ CREATE OR REPLACE TRIGGER trig_cancel_booking
 EXECUTE FUNCTION cancel_booking();
 
 -- конец аренды, координаты окончания передаем в booking вместе со статусом COMPLETED
-CREATE OR REPLACE FUNCTION set_end_location_and_car_status_and_distance() -- todo допилить
+CREATE OR REPLACE FUNCTION set_end_location_and_car_status_and_distance()
 RETURNS TRIGGER AS '
 DECLARE
     new_location_id BIGINT;
