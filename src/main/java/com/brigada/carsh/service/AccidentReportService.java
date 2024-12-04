@@ -13,6 +13,7 @@ import com.brigada.carsh.repository.AccidentReportRepository;
 import com.brigada.carsh.repository.SupportTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class AccidentReportService {
         return AccidentReportMapper.INSTANCE.toResponseDTO(accidentReport);
     }
 
+    @Transactional
     public AccidentReportResponseDTO createAccidentReport(AccidentReportRequestDTO requestDTO, Long ticketId) {
         SupportTicket supportTicket = supportTicketRepository.findById(ticketId).orElseThrow(() -> new SupportTicketNotFoundException(String.format("Support ticket with id=%s was not found", ticketId)));
         AccidentReport accidentReport = AccidentReportMapper.INSTANCE.toEntity(requestDTO);
@@ -43,12 +45,14 @@ public class AccidentReportService {
         return AccidentReportMapper.INSTANCE.toResponseDTO(accidentReportRepository.save(accidentReport));
     }
 
+    @Transactional
     public AccidentReportResponseDTO editAccidentReport(Long id, AccidentReportRequestDTO requestDTO) {
         AccidentReport accidentReport = accidentReportRepository.findById(id).orElseThrow(() -> new AccidentReportNotFoundException(String.format("Accident report with id=%s was not found", id)));
         AccidentReportMapper.INSTANCE.updateAccidentReport(requestDTO, accidentReport);
         return AccidentReportMapper.INSTANCE.toResponseDTO(accidentReportRepository.save(accidentReport));
     }
 
+    @Transactional
     public void deleteAccidentReport(Long id) {
         accidentReportRepository.deleteById(id);
     }

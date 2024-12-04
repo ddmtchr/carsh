@@ -13,6 +13,7 @@ import com.brigada.carsh.repository.PaymentRepository;
 import com.brigada.carsh.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,7 @@ public class PaymentService {
         return paymentRepository.findAllByBooking_User_Id(userId).stream().map(PaymentMapper.INSTANCE::toResponseDTO).toList();
     }
 
+    @Transactional
     public PaymentResponseDTO createPayment(PaymentRequestDTO paymentRequestDTO, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(String.format("Booking with id=%s was not found", bookingId)));
         if (paymentRepository.findByBooking_Id(bookingId).isPresent()) throw new InconsistentRequestException(String.format("Payment for booking id=%s already exists", bookingId));
@@ -45,6 +47,7 @@ public class PaymentService {
         return PaymentMapper.INSTANCE.toResponseDTO(paymentRepository.save(payment));
     }
 
+    @Transactional
     public void deletePayment(Long paymentId) {
         paymentRepository.deleteById(paymentId);
     }

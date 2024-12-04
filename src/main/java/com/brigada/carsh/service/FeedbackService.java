@@ -11,6 +11,7 @@ import com.brigada.carsh.repository.BookingRepository;
 import com.brigada.carsh.repository.FeedbackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,7 @@ public class FeedbackService {
         return FeedbackMapper.INSTANCE.toResponseDTO(feedback);
     }
 
+    @Transactional
     public FeedbackResponseDTO createFeedback(Long bookingId, FeedbackRequestDTO feedbackRequestDTO) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(String.format("Booking with id=%s was not found", bookingId)));
         Feedback feedback = FeedbackMapper.INSTANCE.toEntity(feedbackRequestDTO);

@@ -13,6 +13,7 @@ import com.brigada.carsh.security.entity.User;
 import com.brigada.carsh.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,7 @@ public class DocumentVerificationService {
         return DocumentVerificationMapper.INSTANCE.toResponseDTO(documentVerification);
     }
 
+    @Transactional
     public DocumentVerificationResponseDTO createVerification(DocumentVerificationRequestDTO documentVerificationRequestDTO, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User with id=%s was not found", userId)));
         DocumentVerification documentVerification = DocumentVerificationMapper.INSTANCE.toEntity(documentVerificationRequestDTO);
@@ -41,6 +43,7 @@ public class DocumentVerificationService {
         return DocumentVerificationMapper.INSTANCE.toResponseDTO(documentVerificationRepository.save(documentVerification));
     }
 
+    @Transactional
     public DocumentVerificationResponseDTO verifyDocument(Long id) {
         DocumentVerification documentVerification = documentVerificationRepository.findById(id).orElseThrow(() -> new DocumentVerificationNotFoundException(String.format("Document verification with id=%s was not found", id)));
         if (documentVerification.getStatus() != VerificationStatus.PENDING) {
@@ -51,6 +54,7 @@ public class DocumentVerificationService {
         return DocumentVerificationMapper.INSTANCE.toResponseDTO(documentVerificationRepository.save(documentVerification));
     }
 
+    @Transactional
     public DocumentVerificationResponseDTO rejectDocument(Long id) {
         DocumentVerification documentVerification = documentVerificationRepository.findById(id).orElseThrow(() -> new DocumentVerificationNotFoundException(String.format("Document verification with id=%s was not found", id)));
         if (documentVerification.getStatus() != VerificationStatus.PENDING) {

@@ -14,6 +14,7 @@ import com.brigada.carsh.repository.CarRepository;
 import com.brigada.carsh.repository.MaintenanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class MaintenanceService {
         return maintenanceRepository.findAllByCarId(carId).stream().map(MaintenanceMapper.INSTANCE::toResponseDTO).toList();
     }
 
+    @Transactional
     public MaintenanceResponseDTO addMaintenance(MaintenanceRequestDTO maintenanceRequestDTO, Long carId) {
         Car car = carRepository.findById(carId).orElseThrow(() -> new CarNotFoundException(String.format("Car with id=%s was not found", carId)));
         if (!(car.getStatus() == CarStatus.AVAILABLE || car.getStatus() == CarStatus.RENTED)) {
@@ -45,12 +47,14 @@ public class MaintenanceService {
         return MaintenanceMapper.INSTANCE.toResponseDTO(maintenanceRepository.save(maintenance));
     }
 
+    @Transactional
     public MaintenanceResponseDTO updateMaintenance(MaintenanceRequestDTO maintenanceRequestDTO, Long id) {
         Maintenance maintenance = maintenanceRepository.findById(id).orElseThrow(() -> new MaintenanceNotFoundException(String.format("Maintenance with id=%s was not found", id)));
         MaintenanceMapper.INSTANCE.updateMaintenance(maintenanceRequestDTO, maintenance);
         return MaintenanceMapper.INSTANCE.toResponseDTO(maintenanceRepository.save(maintenance));
     }
 
+    @Transactional
     public MaintenanceResponseDTO endMaintenance(Long id) {
         Maintenance maintenance = maintenanceRepository.findById(id).orElseThrow(() -> new MaintenanceNotFoundException(String.format("Maintenance with id=%s was not found", id)));
         maintenance.setEndDate(LocalDateTime.now());
@@ -58,6 +62,7 @@ public class MaintenanceService {
         return MaintenanceMapper.INSTANCE.toResponseDTO(maintenanceRepository.save(maintenance));
     }
 
+    @Transactional
     public void deleteMaintenance(Long id) {
         maintenanceRepository.deleteById(id);
     }

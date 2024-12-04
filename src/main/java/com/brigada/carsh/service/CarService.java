@@ -9,6 +9,7 @@ import com.brigada.carsh.mapper.CarMapper;
 import com.brigada.carsh.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -37,11 +38,13 @@ public class CarService {
                 new CarNotFoundException(String.format("Car with id=%s was not found", id)));
     }
 
+    @Transactional
     public CarResponseDTO addCar(CarRequestDTO carRequestDTO) {
         Car car = carRepository.save(CarMapper.INSTANCE.toEntity(carRequestDTO));
         return CarMapper.INSTANCE.toResponseDTO(car);
     }
 
+    @Transactional
     public CarResponseDTO updateCar(CarRequestDTO carRequestDTO, Long id) {
         Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException(String.format("Car with id=%s was not found", id)));
         CarMapper.INSTANCE.updateCar(carRequestDTO, car);

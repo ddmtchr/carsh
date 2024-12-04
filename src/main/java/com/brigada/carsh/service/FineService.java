@@ -16,6 +16,7 @@ import com.brigada.carsh.security.entity.User;
 import com.brigada.carsh.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +40,7 @@ public class FineService {
         return optional.map(FineMapper.INSTANCE::toResponseDTO).orElse(null);
     }
 
+    @Transactional
     public FineResponseDTO createFine(Long userId, Long ticketId, FineRequestDTO fineRequestDTO) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User with id=%s not found", userId)));
         Fine fine = FineMapper.INSTANCE.toEntity(fineRequestDTO);
@@ -52,6 +54,7 @@ public class FineService {
         return FineMapper.INSTANCE.toResponseDTO(fineRepository.save(fine));
     }
 
+    @Transactional
     public FineResponseDTO setPaid(Long id) {
         Fine fine = fineRepository.findById(id).orElseThrow(() -> new FineNotFoundException(String.format("Fine with id=%s not found", id)));
         if (fine.getStatus() == FineStatus.PAID) {
@@ -61,6 +64,7 @@ public class FineService {
         return FineMapper.INSTANCE.toResponseDTO(fineRepository.save(fine));
     }
 
+    @Transactional
     public void deleteFine(Long id) {
         fineRepository.deleteById(id);
     }

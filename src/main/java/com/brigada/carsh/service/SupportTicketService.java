@@ -16,6 +16,7 @@ import com.brigada.carsh.security.entity.User;
 import com.brigada.carsh.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,6 +48,7 @@ public class SupportTicketService {
         return SupportTicketMapper.INSTANCE.toResponseDTO(supportTicket);
     }
 
+    @Transactional
     public SupportTicketResponseDTO createSupportTicket(SupportTicketRequestDTO supportTicketRequestDTO, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User with id=%s was not found", userId)));
         Booking booking = null;
@@ -64,6 +66,7 @@ public class SupportTicketService {
         return SupportTicketMapper.INSTANCE.toResponseDTO(supportTicketRepository.save(supportTicket));
     }
 
+    @Transactional
     public SupportTicketResponseDTO acceptSupportTicket(Long id) {
         SupportTicket supportTicket = supportTicketRepository.findById(id).orElseThrow(() -> new SupportTicketNotFoundException(String.format("Support ticket with id=%s was not found", id)));
         if (supportTicket.getStatus() != TicketStatus.OPEN) {
@@ -73,6 +76,7 @@ public class SupportTicketService {
         return SupportTicketMapper.INSTANCE.toResponseDTO(supportTicketRepository.save(supportTicket));
     }
 
+    @Transactional
     public SupportTicketResponseDTO closeSupportTicket(Long id) {
         SupportTicket supportTicket = supportTicketRepository.findById(id).orElseThrow(() -> new SupportTicketNotFoundException(String.format("Support ticket with id=%s was not found", id)));
         if (supportTicket.getStatus() == TicketStatus.CLOSED) {
@@ -82,6 +86,7 @@ public class SupportTicketService {
         return SupportTicketMapper.INSTANCE.toResponseDTO(supportTicketRepository.save(supportTicket));
     }
 
+    @Transactional
     public void deleteSupportTicket(Long id) {
         supportTicketRepository.deleteById(id);
     }
