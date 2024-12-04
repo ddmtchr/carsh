@@ -50,14 +50,6 @@ INSERT INTO payment (booking_id, amount, payment_date) VALUES
 (5, 20.00, '2024-11-05 13:00:00'),
 (6, 22.22, '2024-11-05 13:15:00');
 
--- Таблица fines
-INSERT INTO fine (user_id, amount, issued_date, status, reason) VALUES
-(1, 50.00, '2024-11-01 11:00:00', 'PENDING', 'Speeding'),
-(2, 30.00, '2024-11-02 15:30:00', 'PAID', 'Parking violation'),
-(3, 45.00, '2024-11-03 09:30:00', 'PENDING', 'Traffic signal violation'),
-(4, 25.00, '2024-11-04 14:45:00', 'PAID', 'Improper lane change'),
-(5, 40.00, '2024-11-05 12:15:00', 'PENDING', 'Not wearing seatbelt');
-
 -- Таблица feedback
 INSERT INTO feedback (booking_id, rating, comment, date) VALUES
 (1, 4.5, 'Smooth ride, clean car', '2024-11-01 13:00:00');
@@ -69,6 +61,14 @@ INSERT INTO support_ticket (user_id, booking_id, issue_type, description, status
 (3, 3, 'ACCIDENT', 'Minor accident during rental', 'CLOSED', '2024-11-03 12:00:00'),
 (4, 4, 'FINES', 'Received an unjustified fine', 'OPEN', '2024-11-04 18:30:00'),
 (5, 5, 'RENT', 'Unable to start the car', 'IN_PROGRESS', '2024-11-05 14:30:00');
+
+-- Таблица fines
+INSERT INTO fine (user_id, support_ticket_id, amount, issued_date, status, reason) VALUES
+(1, null, 50.00, '2024-11-01 11:00:00', 'PENDING', 'Speeding'),
+(2, null, 30.00, '2024-11-02 15:30:00', 'PAID', 'Parking violation'),
+(3, 3, 45.00, '2024-11-03 09:30:00', 'PENDING', 'Traffic signal violation'),
+(4, 2, 25.00, '2024-11-04 14:45:00', 'PAID', 'Improper lane change'),
+(5, null, 40.00, '2024-11-05 12:15:00', 'PENDING', 'Not wearing seatbelt');
 
 -- Таблица accident_report
 INSERT INTO accident_report (ticket_id, report_date, report_details, is_guilty) VALUES
