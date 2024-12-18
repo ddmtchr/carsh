@@ -34,6 +34,10 @@ public class DocumentVerificationService {
         return DocumentVerificationMapper.INSTANCE.toResponseDTO(documentVerification);
     }
 
+    public List<DocumentVerificationResponseDTO> getAllVerificationsByStatus(VerificationStatus status) {
+        return documentVerificationRepository.findAllByStatus(status).stream().map(DocumentVerificationMapper.INSTANCE::toResponseDTO).toList();
+    }
+
     @Transactional
     public DocumentVerificationResponseDTO createVerification(DocumentVerificationRequestDTO documentVerificationRequestDTO, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(String.format("User with id=%s was not found", userId)));

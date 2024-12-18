@@ -24,6 +24,9 @@ public class DocumentVerification {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "number", nullable = false)
+    private String number;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false)
     private DocumentType documentType;

@@ -126,6 +126,7 @@ CREATE TABLE IF NOT EXISTS maintenance (
 CREATE TABLE IF NOT EXISTS document_verification (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    number CHAR(10) NOT NULL,
     document_type VARCHAR(20) CHECK (document_type IN ('PASSPORT', 'DRIVING_LICENSE')),
     status VARCHAR(20) CHECK (status IN ('PENDING', 'VERIFIED', 'REJECTED')),
     verification_date TIMESTAMP

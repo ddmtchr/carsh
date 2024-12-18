@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class DocumentVerificationResponseDTO {
     private Long id;
     private Long userId;
+    private String number;
     private DocumentType documentType;
     private VerificationStatus status;
     private LocalDateTime verificationDate;

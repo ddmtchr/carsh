@@ -1,5 +1,6 @@
 package com.brigada.carsh.controller;
 
+import com.brigada.carsh.domain.documentverification.VerificationStatus;
 import com.brigada.carsh.dto.request.DocumentVerificationRequestDTO;
 import com.brigada.carsh.dto.response.DocumentVerificationResponseDTO;
 import com.brigada.carsh.security.service.UserService;
@@ -31,6 +32,11 @@ public class DocumentVerificationController {
     @GetMapping("/{id}")
     public ResponseEntity<DocumentVerificationResponseDTO> getVerificationById(@PathVariable Long id) {
         return ResponseEntity.ok(documentVerificationService.getVerificationById(id));
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<DocumentVerificationResponseDTO>> getAllPending() {
+        return ResponseEntity.ok(documentVerificationService.getAllVerificationsByStatus(VerificationStatus.PENDING));
     }
 
     @PostMapping

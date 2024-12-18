@@ -82,9 +82,9 @@ INSERT INTO maintenance (car_id, start_date, end_date, maintenance_type, status)
 (5, '2024-11-06 12:00:00', NULL, 'Brake inspection', 'PENDING');
 
 -- Таблица document_verification
-INSERT INTO document_verification (user_id, document_type, status, verification_date) VALUES
-(1, 'PASSPORT', 'VERIFIED', '2024-11-01 10:00:00'),
-(2, 'DRIVING_LICENSE', 'PENDING', NULL),
-(3, 'PASSPORT', 'REJECTED', '2024-11-02 14:00:00'),
-(4, 'DRIVING_LICENSE', 'VERIFIED', '2024-11-03 15:30:00'),
-(5, 'PASSPORT', 'VERIFIED', '2024-11-04 11:00:00');
+INSERT INTO document_verification (user_id, number, document_type, status, verification_date) VALUES
+(1, '4561874623', 'PASSPORT', 'VERIFIED', '2024-11-01 10:00:00'),
+(2, '8744525653', 'DRIVING_LICENSE', 'PENDING', NULL),
+(3, '3482778990', 'PASSPORT', 'REJECTED', '2024-11-02 14:00:00'),
+(4, '1856108850', 'DRIVING_LICENSE', 'VERIFIED', '2024-11-03 15:30:00'),
+(5, '3719376105', 'PASSPORT', 'VERIFIED', '2024-11-04 11:00:00');
