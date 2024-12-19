@@ -7,6 +7,7 @@ import {persistor, store} from "./stores/store.ts";
 import {PersistGate} from "redux-persist/integration/react";
 import DocumentVerificationForm from "./components/DocumentVerificationForm.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
+import MainScreen from "./pages/MainScreen.tsx";
 
 const PrivateRoute = () => {
     const token = localStorage.getItem('accessToken');
@@ -32,6 +33,10 @@ const App: React.FC = () => {
 
                         <Route element={<PrivateRoute />}>
                             <Route path="/document-verification" element={<DocumentVerificationForm />} />
+                        </Route>
+
+                        <Route element={<PrivateRoute />}>
+                            <Route path="/main-screen" element={<MainScreen />} />
                         </Route>
 
                         <Route element={<AdminRoute />}>
